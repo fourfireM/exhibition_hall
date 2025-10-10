@@ -1,0 +1,23 @@
+# MediaPipe手势识别核心依赖
+mediapipe==0.10.8
+opencv-python==4.8.1.78
+numpy==1.24.3
+ffmpeg-python==0.2.0
+# Gradio Web界面
+gradio==5.30.0
+
+# 图像处理
+Pillow==10.1.0
+
+# HTTP请求（机器狗API调用）
+requests==2.31.0
+
+# 异步和并发处理（使用Python内置的concurrent.futures和threading）
+
+# 可选：如果需要更好的性能
+# opencv-contrib-python==4.8.1.78  # OpenCV扩展功能
+
+# 开发和调试工具（可选）
+# jupyter==1.0.0
+# matplotlib==3.7.2
+
