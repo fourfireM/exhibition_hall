@@ -16,9 +16,10 @@ def play_audio(file_path, gain=1.0):
         print(f"播放音频时出错: {e}")
  
 if __name__ == "__main__":
-    for file_name in os.listdir("/home/myb/guide_dog/audio_file"):
-        audio_file = "/home/myb/guide_dog/audio_file/" + file_name
-        play_audio(audio_file)  # 尝试 gain=2.0 或更大的值
+    # for file_name in os.listdir("/home/myb/guide_dog/audio_file"):
+    #     audio_file = "/home/myb/guide_dog/audio_file/" + file_name
+    #     play_audio(audio_file)  # 尝试 gain=2.0 或更大的值
+    play_audio("/home/myb/Exhibition_Hall/guide_dog/audio_file/test.mp3")
 
 
 # import simpleaudio as sa

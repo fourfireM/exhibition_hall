@@ -114,10 +114,16 @@ def audio_output(type_name):
     if type_name == "quick":
         file_path = "/home/myb/Exhibition_Hall/guide_dog/audio_file/qingjiakuaijiaobu_xy.mp3"
     if type_name == "return":
-        file_path = "/home/myb/Exhibition_Hall/guide_dog/audio_file/retrurn_xingguangdating_xy.mp3"
+        file_path = "/home/myb/Exhibition_Hall/guide_dog/audio_file/retirn_xingguangdating_xy.mp3"
 
     if type_name == "next":
-        file_path = "/home/myb/Exhibition_Hall/guide_dog/audio_file/next_xy.mp3"
+        file_path = "/home/myb/Exhibition_Hall/guide_dog/audio_file/xinguangdating1.mp3"
+
+    if type_name == "hudongtiyanqu1":
+        file_path = "/home/myb/Exhibition_Hall/guide_dog/audio_file/hudongtiyanqu1.mp3"
+    if type_name == "hudongtiyanqu2":
+        file_path = "/home/myb/Exhibition_Hall/guide_dog/audio_file/hudongtiyanqu2.mp3"
+    
     try:
         command = ["mpg123", "-g", str(1.0), file_path]
         subprocess.run(command, check=True)

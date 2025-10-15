@@ -14,6 +14,7 @@ class GuideDogController:
         self.current_azimuth = 0
         self.status_message = "系统就绪"
         self.thread = None
+        self.audio_output_enabled = True
 
         self.navigation_service_health = None
         self.navigation_status = None
@@ -21,28 +22,28 @@ class GuideDogController:
         # 位置管理
         self.start_position = {
             "position": {
-                "x": 2.138,
-                "y": -1.059,
+                "x": 22.3228,
+                "y": -7.15802,
                 "z": 0
             },
             "orientation": {
                 "x": 0,
                 "y": 0,
-                "z": -0.969,
-                "w": 0.243
+                "z": 0.307274,
+                "w": 0.951621
             } 
         } # 起始点
         self.guide_position = {
             "position": {
-                "x": 5.80781,
-                "y": 6.98177,
+                "x": 16.0805,
+                "y": -3.0642,
                 "z": 0
             },
             "orientation": {
                 "x": 0,
                 "y": 0,
-                "z": 0.752544,
-                "w": 0.658542
+                "z": 0.307274,
+                "w": 0.951621
             }
         }  # 引导目标点
         
@@ -80,12 +81,16 @@ class GuideDogController:
             },
             "zhanting": {
                 "xingguangdating": {
-                    "position": {"x": 13.942, "y": -4.806, "z": 0},
-                    "orientation": {"x": 0, "y": 0, "z": 0.317, "w": 0.948}
+                    "position": {"x": 16.0805, "y": -3.0642, "z": 0},
+                    "orientation": {"x": 0, "y": 0, "z": 0.307274, "w": 0.951621}
+                },
+                "stopping_place": {
+                    "position": {"x": 22.3228, "y": -7.15802, "z": 0},
+                    "orientation": {"x": 0, "y": 0, "z": 0.278892, "w": 0.960323}
                 },
                 "hudongtiyanqu": {
-                    "position": {"x": 12.056, "y": 16.803, "z": 0},
-                    "orientation": {"x": 0, "y": 0, "z": -0.998, "w": 0.048}
+                    "position": {"x": 6.11098, "y": 21.1375, "z": 0},
+                    "orientation": {"x": 0, "y": 0, "z": 0.954009, "w": 0.299778}
                 },
             }
         }
@@ -93,7 +98,7 @@ class GuideDogController:
         # 合并所有路由配置
         self.routes = {
             "vip": ["A", "B", "C"],  # 可扩展为 ["A", "B", "C", "D", "E", "F", "G"]
-            "zhanting": ["xingguangdating", "hudongtiyanqu"]
+            "zhanting": ["xingguangdating", "stopping_place"]
         }
         
         self.current_target_position = None  # 当前目标点
@@ -318,8 +323,9 @@ class GuideDogController:
                     else:
                         self.status_message = f"停止{route_type}引导失败，请检查导航服务"
                         return
-                    
-                audio_output(type_name="quick")
+                if self.audio_output_enabled:
+                    audio_output(type_name="quick")
+                
                 self.status_message = f"{route_type}引导: 距离过远({distance:.2f}m)，等待跟随者靠近，目标: {current_point}"
                 
             elif distance < 2 and not self.navigation_active:
@@ -330,13 +336,20 @@ class GuideDogController:
                 else:
                     self.status_message = f"继续{route_type}引导失败，请检查导航服务"
                     return
-                audio_output(type_name="guide")
+
+                if not self.audio_output_enabled:
+                    self.audio_output_enabled = True
+                    audio_output(type_name="hudongtiyanqu1")
+                else:
+                    audio_output(type_name="guide")
                 
             elif self.navigation_active and 2 <= distance <= 4:
                 self.status_message = f"{route_type}引导中，目标: {current_point}，距离: {distance:.2f}m"
                 
             elif not self.navigation_active and 2 <= distance <= 4:
-                audio_output(type_name="quick")
+                if self.audio_output_enabled:
+                    audio_output(type_name="quick")
+                self.status_message = f"{route_type}等待靠近，目标: {current_point}，距离: {distance:.2f}m"
     
     def _handle_multi_point_returning_state(self):
         """处理多点引导返回状态（统一处理VIP和展厅）"""
@@ -365,6 +378,8 @@ class GuideDogController:
         # 检查是否完成所有点的引导
         if self.current_point_index >= len(route):
             # 引导路径完成
+            if route_type == "zhanting":
+                audio_output(type_name="hudongtiyanqu2")
             self.workflow_state = "waiting"
             self.current_target_position = None
             self.next_target_position = None
@@ -377,8 +392,12 @@ class GuideDogController:
         # 设置下一个目标点
         next_point = route[self.current_point_index]
         self.current_target_position = self.multi_point_positions[route_type][next_point].copy()
+        print(next_point)
+        print('*'*100)
+
         if next_point == "hudongtiyanqu":
             audio_output(type_name="next")
+            self.audio_output_enabled = False
         
         # 开始导航到下一个点
         if navigation_start(self.current_target_position):
@@ -446,7 +465,7 @@ def create_interface():
             with gr.Column(scale=1):
                 gr.Markdown("### 控制面板")
                 start_btn = gr.Button("🚀 启动引路系统", variant="primary", size="lg")
-                # guide_btn = gr.Button("🎯 开始单点引导", variant="secondary", size="lg")
+                guide_btn = gr.Button("🎯 开始引导", variant="secondary", size="lg")
                 # vip_guide_btn = gr.Button("🏛️ VIP室引导", variant="secondary", size="lg")
                 zhanting_guide_btn = gr.Button("🏢 展厅引导", variant="secondary", size="lg")
                 stop_btn = gr.Button("⏹️ 停止系统", variant="stop", size="lg")
@@ -467,10 +486,10 @@ def create_interface():
             outputs=operation_result
         )
         
-        # guide_btn.click(
-        #     fn=start_guide,
-        #     outputs=operation_result
-        # )
+        guide_btn.click(
+            fn=start_guide,
+            outputs=operation_result
+        )
         
         # vip_guide_btn.click(
         #     fn=start_vip,
